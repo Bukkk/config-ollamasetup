@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:rocm
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=10.3.0
+      - HOME=/ollama
+    volumes:
+      - .volumes/.ollama:/ollama/.ollama
+    group_add:
+      - video
+    ipc: host
+    privileged: true
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
+    environment:
+      - OLLAMA_BASE_URL=http://127.0.0.1:11434
+    volumes:
+      - ./.volumes/.webui:/app/backend/data
+    network_mode: host
